@@ -1,7 +1,5 @@
 package com.openclassrooms.starterjwt.security.jwt;
 
-import java.security.Key;
-import java.security.PrivateKey;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -17,6 +15,7 @@ import com.openclassrooms.starterjwt.security.services.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 
 @Component
 public class JwtUtils {
