@@ -1,6 +1,10 @@
 package com.openclassrooms.starterjwt.security.jwt;
 
+import java.security.Key;
+import java.security.PrivateKey;
 import java.util.Date;
+
+import javax.crypto.SecretKey;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +15,8 @@ import org.springframework.stereotype.Component;
 import com.openclassrooms.starterjwt.security.services.UserDetailsImpl;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtils {
@@ -22,25 +28,29 @@ public class JwtUtils {
   @Value("${oc.app.jwtExpirationMs}")
   private int jwtExpirationMs;
 
+
   public String generateJwtToken(Authentication authentication) {
 
     UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-
+	
+	SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     return Jwts.builder()
-        .setSubject((userPrincipal.getUsername()))
-        .setIssuedAt(new Date())
-        .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-        .signWith(SignatureAlgorithm.HS512, jwtSecret)
+		.subject(userPrincipal.getUsername())
+        .issuedAt(new Date())
+        .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
+        .signWith(key)
         .compact();
   }
 
   public String getUserNameFromJwtToken(String token) {
-    return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
+	SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+    return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getSubject();
   }
 
   public boolean validateJwtToken(String authToken) {
+	SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     try {
-      Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
+      Jwts.parser().verifyWith(key).build().parseSignedClaims(authToken);
       return true;
     } catch (SignatureException e) {
       logger.error("Invalid JWT signature: {}", e.getMessage());
