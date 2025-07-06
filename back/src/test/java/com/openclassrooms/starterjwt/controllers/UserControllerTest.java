@@ -77,10 +77,10 @@ class UserControllerTest {
 		mockMvc.perform(delete("/api/user/3"))
 				.andExpect(status().isUnauthorized());
 		assert (userRepository.findById(3L).isPresent());
-	}
 
-	@Test
-	void deleteUserByInvalidId_ShouldFail() throws Exception {
+		mockMvc.perform(delete("/api/user/99"))
+				.andExpect(status().isNotFound());
+
 		mockMvc.perform(delete("/api/user/abc"))
 				.andExpect(status().isBadRequest());
 	}

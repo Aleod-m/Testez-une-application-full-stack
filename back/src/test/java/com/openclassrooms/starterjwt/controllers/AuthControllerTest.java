@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,10 +20,11 @@ import com.openclassrooms.starterjwt.payload.request.SignupRequest;
 import com.openclassrooms.starterjwt.payload.response.JwtResponse;
 import com.openclassrooms.starterjwt.repository.UserRepository;
 
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-@Sql("/user.sql")
+@ActiveProfiles("test")
 class AuthControllerTest {
 
 	@Autowired
@@ -38,6 +39,7 @@ class AuthControllerTest {
 	// UserDto expectedUser1 = new UserDto(2L, "test1@test.com", "Test1", "Test1", false, null, null, null);
 	JwtResponse expectedLoginResponse = new JwtResponse(null, null, "test1@test.com", "Test1", "Test1", false);
 
+
 	@Test
 	void loginUserShouldSucceed() throws Exception {
 		LoginRequest loginRequest = new LoginRequest();
@@ -51,6 +53,21 @@ class AuthControllerTest {
 				.andExpectAll(
 						status().isOk(),
 						content().json(objectMapper.writeValueAsString(expectedLoginResponse), ignoreAttrs("token", "id")));
+
+	}
+
+	@Test
+	void loginAdminShouldSucceed() throws Exception {
+		LoginRequest adminLoginRequest = new LoginRequest();
+		adminLoginRequest.setEmail("yoga@studio.com");
+		adminLoginRequest.setPassword("test!1234");
+		mockMvc.perform(
+				post("/api/auth/login")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(adminLoginRequest)))
+				.andExpectAll(
+						status().isOk(),
+						jsonPath("$.admin").value(true));
 	}
 
 	@Test
