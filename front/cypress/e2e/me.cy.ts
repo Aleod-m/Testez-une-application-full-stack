@@ -4,7 +4,7 @@ describe('Me Spec', () => {
     cy.intercept(
       {
         method: 'GET',
-        url: '/api/user/1',
+        url: '/api/user/2',
       },
       [ {
         "id": "1",
@@ -12,8 +12,8 @@ describe('Me Spec', () => {
         "lastName": "Test",
         "firstName": "Test",
         "admin": false,
-        "createdAt": "2024-01-16T11:34:03",
-        "updatedAt": "2024-01-16T11:34:03"
+        "createdAt": new Date(),
+        "updatedAt": new Date()
       }]).as('user')
     cy.get('[routerlink="me"]').click();
     cy.wait('@user');
